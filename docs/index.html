@@ -3,20 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bluesky User Stats</title>
+    <title>Bluesky User Growth</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
   </head>
-  <body class="bg-gray-100 text-gray-800 p-4">
-    <div class="max-w-3xl mx-auto mt-20">
-      <h1 class="text-3xl font-bold mb-4">Bluesky User Growth</h1>
-      <canvas id="dailyChart" height="200"></canvas>
-      <h2 class="text-xl mt-8 font-semibold">Monthly Growth</h2>
-      <canvas id="monthlyChart" height="200"></canvas>
+  <body class="bg-gray-100 text-gray-800 p-4 mt-20">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl font-bold mb-4">Bluesky Network User Growth</h1>
+      <canvas id="userChart" height="200"></canvas>
     </div>
+    <footer class="max-w-3xl mx-auto mt-8 text-center text-sm text-gray-600">
+      <p>
+        Powered by
+        <a
+          href="https://bsky.jazco.dev/stats"
+          class="text-blue-600 hover:text-blue-800"
+          target="_blank"
+          >Jaz's bsky stats</a
+        >
+      </p>
+    </footer>
     <script src="script.js"></script>
   </body>
 </html>
