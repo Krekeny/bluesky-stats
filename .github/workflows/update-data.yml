@@ -31,5 +31,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add docs/data/stats.json
-          git commit -m "Append daily total_users from jazco.io" || echo "No changes to commit"
+          git commit -m "chore(stats): appends daily total_users from jazco.io" || echo "No changes to commit"
           git push
