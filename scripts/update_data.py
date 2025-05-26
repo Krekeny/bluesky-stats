@@ -10,7 +10,10 @@ def load_existing():
     if not os.path.exists(SAVE_PATH):
         return []
     with open(SAVE_PATH, "r") as f:
-        return json.load(f)
+        data = json.load(f)
+        if isinstance(data, dict) and "daily_data" in data:
+            return data["daily_data"]
+        return data
 
 def fetch_today_entry():
     response = requests.get(URL)
@@ -19,11 +22,10 @@ def fetch_today_entry():
         return None
     raw = response.json()
     today_str = str(date.today())
-    for entry in raw.get("daily_data", []):
-        if entry.get("date") == today_str and "total_users" in entry:
-            return {"date": today_str, "total_users": entry["total_users"]}
-    print("No valid entry for today found")
-    return None
+    if "total_users" not in raw:
+        print("No total_users in response")
+        return None
+    return {"date": today_str, "total_users": raw["total_users"]}
 
 def save_combined(data):
     with open(SAVE_PATH, "w") as f:
