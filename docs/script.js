@@ -21,6 +21,16 @@ async function loadData() {
   }
 }
 
+function calculateDailyDifferences(data) {
+  return data.map((d, i) => {
+    if (i === 0) return { date: d.date, difference: 0 };
+    return {
+      date: d.date,
+      difference: d.total_users - data[i - 1].total_users,
+    };
+  });
+}
+
 function renderChart(ctx, labels, data, label, color) {
   if (!ctx || !labels.length || !data.length) {
     console.error("Invalid data for chart rendering");
@@ -82,18 +92,31 @@ loadData().then((data) => {
 
   const labels = data.map((d) => d.date);
   const totals = data.map((d) => d.total_users);
+  const dailyDifferences = calculateDailyDifferences(data);
 
-  const chartElement = document.getElementById("userChart");
-  if (!chartElement) {
-    console.error("Chart element not found");
+  const totalUsersChartElement = document.getElementById("userChart");
+  const dailyGrowthChartElement = document.getElementById("dailyGrowthChart");
+
+  if (!totalUsersChartElement || !dailyGrowthChartElement) {
+    console.error("Chart elements not found");
     return;
   }
 
+  // Render total users chart
   renderChart(
-    chartElement.getContext("2d"),
+    totalUsersChartElement.getContext("2d"),
     labels,
     totals,
     "Total Users",
     "#6366f1"
+  );
+
+  // Render daily growth chart
+  renderChart(
+    dailyGrowthChartElement.getContext("2d"),
+    labels,
+    dailyDifferences.map((d) => d.difference),
+    "Daily Growth",
+    "#10b981"
   );
 });
