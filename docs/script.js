@@ -151,13 +151,11 @@ function renderMonthlyChart(ctx, monthlyData) {
           label: "Total Users (End of Month)",
           data: endUsers,
           backgroundColor: "#6366f1",
-          yAxisID: "y",
         },
         {
           label: "Monthly Growth",
           data: growth,
           backgroundColor: "#10b981",
-          yAxisID: "y1",
         },
       ],
     },
@@ -174,25 +172,9 @@ function renderMonthlyChart(ctx, monthlyData) {
           position: "left",
           title: {
             display: true,
-            text: "Total Users",
+            text: "Users",
           },
-          ticks: {
-            callback: function (value) {
-              return value.toLocaleString();
-            },
-          },
-        },
-        y1: {
-          type: "linear",
-          display: true,
-          position: "right",
-          title: {
-            display: true,
-            text: "Monthly Growth",
-          },
-          grid: {
-            drawOnChartArea: false,
-          },
+          beginAtZero: true,
           ticks: {
             callback: function (value) {
               return value.toLocaleString();
