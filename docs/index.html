@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bluesky User Growth</title>
+    <title>Bluesky User Growth & Statistics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
@@ -11,13 +11,64 @@
     />
   </head>
   <body class="bg-gray-100 text-gray-800 p-4 mt-20">
-    <div class="max-w-3xl mx-auto">
-      <h1 class="text-3xl font-bold mb-4">Bluesky Network User Growth</h1>
-      <canvas id="userChart" height="200"></canvas>
-      <h2 class="text-2xl font-bold mb-4 mt-8">Daily User Growth</h2>
-      <canvas id="dailyGrowthChart" height="200"></canvas>
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-3xl font-bold mb-4">Bluesky Statistics</h1>
+
+      <!-- Overview Section -->
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">
+          Current Overview
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600" id="currentUsers">
+              -
+            </div>
+            <div class="text-sm text-gray-600">Total Users</div>
+          </div>
+          <div class="text-center">
+            <div
+              class="text-lg font-semibold text-gray-800"
+              id="currentTimestamp"
+            >
+              -
+            </div>
+            <div class="text-sm text-gray-600">Data Last Updated</div>
+          </div>
+          <div class="text-center">
+            <div class="text-lg font-semibold text-gray-800" id="dataStartDate">
+              -
+            </div>
+            <div class="text-sm text-gray-600">Data Start Date</div>
+          </div>
+          <div class="text-center">
+            <div class="text-lg font-semibold text-gray-800" id="lastEntryDate">
+              -
+            </div>
+            <div class="text-sm text-gray-600">Last Entry Date</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Charts Section -->
+      <div class="mb-8">
+        <canvas id="userChart" height="200"></canvas>
+        <h2 class="text-2xl font-bold mb-4 mt-8">Daily User Growth</h2>
+        <canvas id="dailyGrowthChart" height="200"></canvas>
+      </div>
+
+      <!-- Monthly Statistics Section -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Monthly User Statistics</h2>
+        <canvas id="monthlyChart" height="200"></canvas>
+
+        <div class="mt-8">
+          <h3 class="text-xl font-semibold mb-4">Monthly Growth Details</h3>
+          <div id="monthlyTable"></div>
+        </div>
+      </div>
     </div>
-    <footer class="max-w-3xl mx-auto mt-8 text-center text-sm text-gray-600">
+    <footer class="max-w-6xl mx-auto mt-8 text-center text-sm text-gray-600">
       <p>
         Powered by
         <a
