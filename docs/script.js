@@ -462,11 +462,19 @@ loadData().then((data) => {
     return;
   }
 
-  // Render total users chart
+  // Render total users chart with reduced density
+  const densityFactor = Math.max(1, Math.floor(labels.length / 30));
+  const reducedLabels = labels.filter(
+    (_, index) => index % densityFactor === 0
+  );
+  const reducedTotals = totals.filter(
+    (_, index) => index % densityFactor === 0
+  );
+
   renderChart(
     totalUsersChartElement.getContext("2d"),
-    labels,
-    totals,
+    reducedLabels,
+    reducedTotals,
     "Total Users",
     "#6366f1"
   );
