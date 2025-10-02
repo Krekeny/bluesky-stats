@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bluesky Statistics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
@@ -54,8 +56,51 @@
       <div class="mb-8">
         <h2 class="text-2xl font-bold mb-4 mt-8">Total User Growth</h2>
         <canvas id="userChart" height="150"></canvas>
-        <h2 class="text-2xl font-bold mb-4 mt-8">Daily User Growth</h2>
+        <h2 class="text-2xl font-bold mb-4 mt-8" id="dailyGrowthTitle">
+          Daily User Growth
+        </h2>
         <canvas id="dailyGrowthChart" height="150"></canvas>
+
+        <!-- Chart Controls -->
+        <div class="mt-4 bg-white rounded-lg shadow-md p-4">
+          <h3 class="text-lg font-semibold mb-3">Chart Controls</h3>
+          <div class="flex flex-wrap gap-2">
+            <button
+              id="zoomIn"
+              class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+            >
+              Zoom In
+            </button>
+            <button
+              id="zoomOut"
+              class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+            >
+              Zoom Out
+            </button>
+            <button
+              id="resetZoom"
+              class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
+            >
+              Reset Zoom
+            </button>
+            <button
+              id="showLast30Days"
+              class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+            >
+              Last 30 Days
+            </button>
+            <button
+              id="showAllData"
+              class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm"
+            >
+              Show All
+            </button>
+          </div>
+          <p class="text-sm text-gray-600 mt-2">
+            <strong>Instructions:</strong> Scroll to zoom in/out, or use the
+            buttons above. The chart starts showing the last 30 days by default.
+          </p>
+        </div>
       </div>
 
       <!-- Monthly Statistics Section -->

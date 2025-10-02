@@ -79,13 +79,13 @@ function calculateMonthlyStats(data) {
   });
 }
 
-function renderChart(ctx, labels, data, label, color) {
+function renderChart(ctx, labels, data, label, color, isDailyGrowth = false) {
   if (!ctx || !labels.length || !data.length) {
     console.error("Invalid data for chart rendering");
     return;
   }
 
-  new Chart(ctx, {
+  const chartOptions = {
     type: "line",
     data: {
       labels,
@@ -129,7 +129,29 @@ function renderChart(ctx, labels, data, label, color) {
         },
       },
     },
-  });
+  };
+
+  // Add zoom functionality for daily growth chart
+  if (isDailyGrowth) {
+    chartOptions.options.plugins.zoom = {
+      zoom: {
+        wheel: {
+          enabled: true,
+        },
+        mode: "x",
+      },
+    };
+
+    // Set initial zoom to show last 30 days
+    const totalDays = labels.length;
+    const defaultDays = Math.min(30, totalDays);
+    const startIndex = Math.max(0, totalDays - defaultDays);
+
+    chartOptions.options.scales.x.min = labels[startIndex];
+    chartOptions.options.scales.x.max = labels[totalDays - 1];
+  }
+
+  return new Chart(ctx, chartOptions);
 }
 
 function renderMonthlyChart(ctx, monthlyData) {
@@ -296,6 +318,127 @@ function updateOverview(data) {
     lastEntryDateElement.textContent = formatDate(lastEntryDate);
 }
 
+// Global variable to store the daily growth chart instance
+let dailyGrowthChart = null;
+let allLabels = [];
+
+function updateDailyGrowthTitle(chart) {
+  if (!chart || !allLabels.length) return;
+
+  const titleElement = document.getElementById("dailyGrowthTitle");
+  if (!titleElement) return;
+
+  const xScale = chart.scales.x;
+
+  // Get the current visible range from the scale
+  const minValue = xScale.min;
+  const maxValue = xScale.max;
+
+  let startDate, endDate;
+
+  if (minValue !== undefined && maxValue !== undefined) {
+    // Find the actual visible data points based on the scale bounds
+    const visibleStartIndex = Math.max(0, Math.floor(minValue));
+    const visibleEndIndex = Math.min(allLabels.length - 1, Math.ceil(maxValue));
+
+    startDate = allLabels[visibleStartIndex];
+    endDate = allLabels[visibleEndIndex];
+  } else {
+    // If no specific bounds, show the full range
+    startDate = allLabels[0];
+    endDate = allLabels[allLabels.length - 1];
+  }
+
+  // Format dates
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const startFormatted = formatDate(startDate);
+  const endFormatted = formatDate(endDate);
+
+  titleElement.textContent = `Daily User Growth (${startFormatted} - ${endFormatted})`;
+}
+
+function setupChartControls(chart, labels) {
+  const zoomInBtn = document.getElementById("zoomIn");
+  const zoomOutBtn = document.getElementById("zoomOut");
+  const resetZoomBtn = document.getElementById("resetZoom");
+  const showLast30DaysBtn = document.getElementById("showLast30Days");
+  const showAllDataBtn = document.getElementById("showAllData");
+
+  // Store labels globally for title updates
+  allLabels = labels;
+
+  // Add event listener for chart updates
+  chart.options.onResize = function () {
+    updateDailyGrowthTitle(chart);
+  };
+
+  // Listen for zoom/pan events
+  chart.canvas.addEventListener("wheel", () => {
+    setTimeout(() => updateDailyGrowthTitle(chart), 100);
+  });
+
+  chart.canvas.addEventListener("mousedown", () => {
+    const handleMouseUp = () => {
+      setTimeout(() => updateDailyGrowthTitle(chart), 100);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+    document.addEventListener("mouseup", handleMouseUp);
+  });
+
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener("click", () => {
+      chart.zoom(1.1);
+      setTimeout(() => updateDailyGrowthTitle(chart), 100);
+    });
+  }
+
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener("click", () => {
+      chart.zoom(0.9);
+      setTimeout(() => updateDailyGrowthTitle(chart), 100);
+    });
+  }
+
+  if (resetZoomBtn) {
+    resetZoomBtn.addEventListener("click", () => {
+      chart.resetZoom();
+      setTimeout(() => updateDailyGrowthTitle(chart), 100);
+    });
+  }
+
+  if (showLast30DaysBtn) {
+    showLast30DaysBtn.addEventListener("click", () => {
+      const totalDays = labels.length;
+      const defaultDays = Math.min(30, totalDays);
+      const startIndex = Math.max(0, totalDays - defaultDays);
+
+      chart.options.scales.x.min = labels[startIndex];
+      chart.options.scales.x.max = labels[totalDays - 1];
+      chart.update();
+      setTimeout(() => updateDailyGrowthTitle(chart), 100);
+    });
+  }
+
+  if (showAllDataBtn) {
+    showAllDataBtn.addEventListener("click", () => {
+      chart.options.scales.x.min = undefined;
+      chart.options.scales.x.max = undefined;
+      chart.update();
+      setTimeout(() => updateDailyGrowthTitle(chart), 100);
+    });
+  }
+
+  // Initial title update
+  setTimeout(() => updateDailyGrowthTitle(chart), 100);
+}
+
 loadData().then((data) => {
   if (data.length === 0) {
     console.error("No data available to display");
@@ -328,14 +471,18 @@ loadData().then((data) => {
     "#6366f1"
   );
 
-  // Render daily growth chart
-  renderChart(
+  // Render daily growth chart with zoom functionality
+  dailyGrowthChart = renderChart(
     dailyGrowthChartElement.getContext("2d"),
     labels,
     dailyDifferences.map((d) => d.difference),
     "Daily Growth",
-    "#10b981"
+    "#10b981",
+    true // Enable zoom functionality
   );
+
+  // Setup chart controls
+  setupChartControls(dailyGrowthChart, labels);
 
   // Render monthly chart if element exists
   if (monthlyChartElement) {
