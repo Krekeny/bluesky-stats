@@ -3,135 +3,139 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bluesky Statistics</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+    <title>Bluesky Statistics — User Growth Dashboard</title>
+    <meta name="description" content="Daily Bluesky user growth statistics. Track total users, daily growth, monthly trends, and key milestones." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="bg-gray-100 text-gray-800 p-4 mt-20">
-    <div class="max-w-6xl mx-auto">
-      <h1 class="text-3xl font-bold mb-4">Bluesky Statistics</h1>
+  <body>
+    <div class="page-wrap">
 
-      <!-- Overview Section -->
-      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">
-          Current Overview
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="text-center">
-            <div class="text-2xl font-bold text-blue-600" id="currentUsers">
-              -
-            </div>
-            <div class="text-sm text-gray-600">Total Users</div>
+      <!-- ── Header ── -->
+      <header class="site-header fi fi1">
+        <h1 class="site-title">Bluesky Statistics</h1>
+        <span class="site-updated mono muted" id="headerDate">Updated —</span>
+      </header>
+
+      <!-- ── KPI Cards ── -->
+      <section class="kpi-grid fi fi2" aria-label="Key metrics">
+        <!-- Card 1: Total Users -->
+        <div class="card kpi-card" id="kpi-total">
+          <div class="kpi-label">Total users</div>
+          <div class="kpi-number mono" id="kpiTotalUsers">—</div>
+          <div class="sparkline" id="sparkline" aria-hidden="true"></div>
+        </div>
+
+        <!-- Card 2: 30d growth -->
+        <div class="card kpi-card" id="kpi-30d">
+          <div class="kpi-label">30d growth</div>
+          <div class="kpi-number mono" id="kpi30dPct">—</div>
+          <div class="kpi-sub green mono" id="kpi30dAbs"></div>
+        </div>
+
+        <!-- Card 3: Avg daily 7d -->
+        <div class="card kpi-card" id="kpi-7d">
+          <div class="kpi-label">Avg daily (7d)</div>
+          <div class="kpi-number mono" id="kpiAvg7d">—</div>
+          <div class="kpi-sub green mono" id="kpiAvg7dSub"></div>
+        </div>
+
+        <!-- Card 4: New today -->
+        <div class="card kpi-card" id="kpi-today">
+          <div class="kpi-label">New today</div>
+          <div class="kpi-number mono" id="kpiNewToday">—</div>
+          <div class="kpi-sub green mono" id="kpiNewTodaySub"></div>
+        </div>
+      </section>
+
+      <!-- ── Daily New Users ── -->
+      <section class="card chart-card fi fi3" id="dailySection">
+        <div class="chart-header">
+          <div class="section-title">Daily new users</div>
+          <div class="range-selector" id="rangeSelector" role="group" aria-label="Time range">
+            <button class="range-btn mono" data-days="7">7d</button>
+            <button class="range-btn mono" data-days="30">30d</button>
+            <button class="range-btn mono active" data-days="90">90d</button>
+            <button class="range-btn mono" data-days="365">1y</button>
+            <button class="range-btn mono" data-days="0">All</button>
           </div>
-          <div class="text-center">
-            <div
-              class="text-lg font-semibold text-gray-800"
-              id="currentTimestamp"
-            >
-              -
-            </div>
-            <div class="text-sm text-gray-600">Data Last Updated</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="dailyChart" aria-label="Daily new users bar chart"></canvas>
+        </div>
+      </section>
+
+      <!-- ── Monthly Overview ── -->
+      <div class="two-col fi fi4">
+        <!-- Monthly Growth -->
+        <div class="card chart-card">
+          <div class="chart-header">
+            <div class="section-title">Monthly growth</div>
+            <div class="chart-sub mono muted">Last 18 mo</div>
           </div>
-          <div class="text-center">
-            <div class="text-lg font-semibold text-gray-800" id="dataStartDate">
-              -
-            </div>
-            <div class="text-sm text-gray-600">Data Start Date</div>
+          <div class="chart-wrap chart-wrap--sm">
+            <canvas id="monthlyGrowthChart" aria-label="Monthly growth bar chart"></canvas>
           </div>
-          <div class="text-center">
-            <div class="text-lg font-semibold text-gray-800" id="lastEntryDate">
-              -
-            </div>
-            <div class="text-sm text-gray-600">Last Entry Date</div>
+        </div>
+
+        <!-- Growth Rate -->
+        <div class="card chart-card">
+          <div class="chart-header">
+            <div class="section-title">Growth rate</div>
+            <div class="chart-sub mono muted">% / month</div>
+          </div>
+          <div class="chart-wrap chart-wrap--sm">
+            <canvas id="growthRateChart" aria-label="Monthly growth rate line chart"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- Daily Charts Section -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold mb-4 mt-8">Total User Growth</h2>
-        <canvas id="userChart" height="150"></canvas>
-        <h2 class="text-2xl font-bold mb-4 mt-8" id="dailyGrowthTitle">
-          Daily User Growth
-        </h2>
-        <canvas id="dailyGrowthChart" height="150"></canvas>
+      <!-- ── Key Milestones ── -->
+      <section class="card milestones-card fi fi5" id="milestonesSection" aria-label="Key milestones">
+        <div class="milestones-grid" id="milestonesGrid"></div>
+      </section>
 
-        <!-- Chart Controls -->
-        <div class="mt-4 bg-white rounded-lg shadow-md p-4">
-          <h3 class="text-lg font-semibold mb-3">Chart Controls</h3>
-          <div class="flex flex-wrap gap-2">
-            <button
-              id="zoomIn"
-              class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-            >
-              Zoom In
-            </button>
-            <button
-              id="zoomOut"
-              class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-            >
-              Zoom Out
-            </button>
-            <button
-              id="resetZoom"
-              class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
-            >
-              Reset Zoom
-            </button>
-            <button
-              id="showLast30Days"
-              class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
-            >
-              Last 30 Days
-            </button>
-            <button
-              id="showAllData"
-              class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm"
-            >
-              Show All
-            </button>
-          </div>
-          <p class="text-sm text-gray-600 mt-2">
-            <strong>Instructions:</strong> Scroll to zoom in/out, or use the
-            buttons above. The chart starts showing the last 30 days by default.
-          </p>
+      <!-- ── Monthly Breakdown Table ── -->
+      <section class="card table-card fi fi6" id="tableSection" aria-label="Monthly breakdown">
+        <div class="table-header">
+          <div class="section-title">Monthly breakdown</div>
         </div>
-      </div>
-
-      <!-- Monthly Statistics Section -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold mb-4">Monthly User Statistics</h2>
-        <canvas id="monthlyChart" height="150"></canvas>
-
-        <div class="mt-8">
-          <h3 class="text-xl font-semibold mb-4">Monthly Growth Details</h3>
-          <div id="monthlyTable"></div>
+        <div class="table-scroll">
+          <table id="monthlyTable" class="data-table">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>End Total</th>
+                <th>New Users</th>
+                <th>Avg / Day</th>
+                <th>Growth</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyTableBody"></tbody>
+          </table>
         </div>
+        <div class="pagination" id="pagination"></div>
+      </section>
+
+    </div><!-- /.page-wrap -->
+
+    <!-- ── Footer ── -->
+    <footer class="site-footer fi fi7">
+      <div class="page-wrap footer-inner">
+        <span class="mono muted">Source: <a href="https://bsky.jazco.dev/stats" target="_blank" rel="noopener" class="footer-link">Jaz's bsky stats</a></span>
+        <span class="mono muted"><a href="https://github.com/Krekeny/bluesky-stats" target="_blank" rel="noopener" class="footer-link">GitHub Repository</a></span>
+        <span class="mono muted" id="footerYear"></span>
       </div>
-    </div>
-    <footer class="max-w-6xl mx-auto mt-8 text-center text-sm text-gray-600">
-      <p>
-        Powered by
-        <a
-          href="https://bsky.jazco.dev/stats"
-          class="text-blue-600 hover:text-blue-800"
-          target="_blank"
-          >Jaz's bsky stats</a
-        >
-        |
-        <a
-          href="https://github.com/Krekeny/bluesky-stats"
-          class="text-blue-600 hover:text-blue-800"
-          target="_blank"
-          >GitHub Repository</a
-        >
-      </p>
     </footer>
+
     <script src="script.js"></script>
   </body>
 </html>
