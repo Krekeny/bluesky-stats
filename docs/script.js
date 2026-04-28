@@ -47,24 +47,29 @@ function fmtAxisDate(dateStr, days) {
 ══════════════════════════════════════════════════════════ */
 async function loadData() {
   try {
-    const res = await fetch('data/stats.json');
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-    const data = await res.json();
+    const [statsRes, eventsRes] = await Promise.all([
+      fetch('data/stats.json'),
+      fetch('data/events.json')
+    ]);
 
-    const dailyData = Array.isArray(data) ? data : data.daily_data || [];
+    if (!statsRes.ok) throw new Error(`Stats HTTP error! ${statsRes.status}`);
+    const statsRaw = await statsRes.json();
+    const events = eventsRes.ok ? await eventsRes.json() : [];
 
-    return dailyData
+    const dailyData = Array.isArray(statsRaw) ? statsRaw : statsRaw.daily_data || [];
+
+    const stats = dailyData
       .filter((d) => d.total_users && d.total_users > 0)
       .map((d) => ({
         date: d.date,
         total_users: d.total_users,
       }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return { stats, events };
   } catch (error) {
     console.error('Error loading data:', error);
-    return [];
+    return { stats: [], events: [] };
   }
 }
 
@@ -236,6 +241,14 @@ function baseScales(yFormatter) {
    CHART INSTANCES (module-level so we can destroy/recreate)
 ══════════════════════════════════════════════════════════ */
 let dailyChartInstance = null;
+let monthlyChartInstance = null;
+let rateChartInstance = null;
+
+window.addEventListener('resize', () => {
+  if (dailyChartInstance) dailyChartInstance.resize();
+  if (monthlyChartInstance) monthlyChartInstance.resize();
+  if (rateChartInstance) rateChartInstance.resize();
+});
 
 /* ══════════════════════════════════════════════════════════
    RENDER: KPI CARDS
@@ -401,7 +414,12 @@ function renderMonthlyGrowthChart(monthly) {
 
   const slice = monthly.slice(-18);
 
-  new Chart(ctx, {
+  if (monthlyChartInstance) {
+    monthlyChartInstance.destroy();
+    monthlyChartInstance = null;
+  }
+
+  monthlyChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: slice.map((m) => m.shortLabel),
@@ -442,7 +460,12 @@ function renderGrowthRateChart(monthly) {
 
   const slice = monthly.slice(-18);
 
-  new Chart(ctx, {
+  if (rateChartInstance) {
+    rateChartInstance.destroy();
+    rateChartInstance = null;
+  }
+
+  rateChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: slice.map((m) => m.shortLabel),
@@ -486,46 +509,43 @@ function renderGrowthRateChart(monthly) {
 /* ══════════════════════════════════════════════════════════
    RENDER: KEY MILESTONES
 ══════════════════════════════════════════════════════════ */
-function renderMilestones(enriched) {
-  const MILESTONES = [
-    { month: '2024-02', name: 'Public Launch' },
-    { month: '2024-09', name: 'Brazil X Ban' },
-    { month: '2024-11', name: 'US Election Exodus' },
-    { month: '2025-01', name: 'Federation Opens' },
-  ];
-
+function renderEvents(enriched, events) {
   const grid = document.getElementById('milestonesGrid');
   const section = document.getElementById('milestonesSection');
-  if (!grid || !section) return;
+  if (!grid || !section || !events.length) return;
 
   const dataStart = enriched[0].date;
   const dataEnd   = enriched[enriched.length - 1].date;
 
-  const found = [];
-  MILESTONES.forEach((ms) => {
-    // Only show milestones whose month falls within the loaded dataset range
-    const msStart = ms.month + '-01';
-    const msEnd   = ms.month + '-31';
-    if (msEnd < dataStart || msStart > dataEnd) return; // outside dataset — skip
+  // Sort events newest first
+  const sortedEvents = [...events].sort((a, b) => b.date.localeCompare(a.date));
 
-    const match = enriched.find((d) => d.date.startsWith(ms.month));
-    if (match) found.push({ ...ms, data: match });
-  });
+  grid.innerHTML = sortedEvents.map((ev) => {
+    const match = enriched.find((d) => d.date === ev.date) || 
+                  enriched.find((d) => d.date.startsWith(ev.date.slice(0, 7)));
+    
+    const dateObj = new Date(ev.date + 'T00:00:00Z');
+    const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const isHistorical = ev.date < dataStart;
 
-  if (found.length === 0) {
-    section.style.display = 'none';
-    return;
-  }
-
-  grid.innerHTML = found.map((ms, i) => `
-    <div class="milestone-col">
-      <div class="milestone-date mono">
-        ${new Date(ms.data.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+    return `
+      <div class="milestone-col">
+        <div class="milestone-date mono">${displayDate}</div>
+        <div class="milestone-name">${ev.title}</div>
+        <div class="milestone-desc">${ev.description}</div>
+        ${match ? `<div class="milestone-total mono">${fmtAbbr(match.total_users)} users</div>` : ''}
+        ${isHistorical ? '<div class="milestone-tag mono">Historical</div>' : ''}
       </div>
-      <div class="milestone-name">${ms.name}</div>
-      <div class="milestone-total">${fmtAbbr(ms.data.total_users)}</div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+
+  // Setup nav buttons
+  const btnPrev = document.getElementById('msPrev');
+  const btnNext = document.getElementById('msNext');
+  if (btnPrev && btnNext) {
+    btnPrev.onclick = () => grid.scrollBy({ left: -grid.offsetWidth, behavior: 'smooth' });
+    btnNext.onclick = () => grid.scrollBy({ left: grid.offsetWidth, behavior: 'smooth' });
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -616,14 +636,14 @@ function renderMeta(enriched) {
 /* ══════════════════════════════════════════════════════════
    MAIN — data fetch, then render everything
 ══════════════════════════════════════════════════════════ */
-loadData().then((data) => {
-  if (data.length === 0) {
+loadData().then(({ stats, events }) => {
+  if (stats.length === 0) {
     console.error('No data available to display');
     return;
   }
 
   // Enrich raw data with computed daily growth
-  const enriched = enrichWithDaily(data);
+  const enriched = enrichWithDaily(stats);
 
   // Build monthly aggregates
   const monthly = buildMonthly(enriched);
@@ -638,6 +658,6 @@ loadData().then((data) => {
   setupRangeSelector(enriched);
   renderMonthlyGrowthChart(monthly);
   renderGrowthRateChart(monthly);
-  renderMilestones(enriched);
+  renderEvents(enriched, events);
   renderTablePage();
 });
