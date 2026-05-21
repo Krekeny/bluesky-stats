@@ -1,15 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bluesky Statistics — User Growth Dashboard</title>
-    <meta name="description" content="Daily Bluesky user growth statistics. Track total users, daily growth, monthly trends, and key milestones." />
+    <meta
+      name="description"
+      content="Daily Bluesky user growth statistics. Track total users, daily growth, monthly trends, and key milestones."
+    />
+    <meta
+      name="google-site-verification"
+      content="lwtgwu66MpwUzZLBHxWCleseqlux7yY0H2-LTCA8wsc"
+    />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -18,7 +28,6 @@
   </head>
   <body>
     <div class="page-wrap">
-
       <!-- ── Header ── -->
       <header class="site-header fi fi1">
         <h1 class="site-title">Bluesky Statistics</h1>
@@ -60,7 +69,12 @@
       <section class="card chart-card fi fi3" id="dailySection">
         <div class="chart-header">
           <div class="section-title">Daily new users</div>
-          <div class="range-selector" id="rangeSelector" role="group" aria-label="Time range">
+          <div
+            class="range-selector"
+            id="rangeSelector"
+            role="group"
+            aria-label="Time range"
+          >
             <button class="range-btn mono" data-days="7">7d</button>
             <button class="range-btn mono" data-days="30">30d</button>
             <button class="range-btn mono active" data-days="90">90d</button>
@@ -69,7 +83,10 @@
           </div>
         </div>
         <div class="chart-wrap">
-          <canvas id="dailyChart" aria-label="Daily new users bar chart"></canvas>
+          <canvas
+            id="dailyChart"
+            aria-label="Daily new users bar chart"
+          ></canvas>
         </div>
       </section>
 
@@ -82,7 +99,10 @@
             <div class="chart-sub mono muted">Last 18 mo</div>
           </div>
           <div class="chart-wrap chart-wrap--sm">
-            <canvas id="monthlyGrowthChart" aria-label="Monthly growth bar chart"></canvas>
+            <canvas
+              id="monthlyGrowthChart"
+              aria-label="Monthly growth bar chart"
+            ></canvas>
           </div>
         </div>
 
@@ -93,13 +113,20 @@
             <div class="chart-sub mono muted">% / month</div>
           </div>
           <div class="chart-wrap chart-wrap--sm">
-            <canvas id="growthRateChart" aria-label="Monthly growth rate line chart"></canvas>
+            <canvas
+              id="growthRateChart"
+              aria-label="Monthly growth rate line chart"
+            ></canvas>
           </div>
         </div>
       </div>
 
       <!-- ── Key Milestones ── -->
-      <section class="card milestones-card fi fi5" id="milestonesSection" aria-label="Key milestones">
+      <section
+        class="card milestones-card fi fi5"
+        id="milestonesSection"
+        aria-label="Key milestones"
+      >
         <div class="milestones-header">
           <div class="section-title">Ecosystem Milestones</div>
           <div class="milestones-nav">
@@ -111,7 +138,11 @@
       </section>
 
       <!-- ── Monthly Breakdown Table ── -->
-      <section class="card table-card fi fi6" id="tableSection" aria-label="Monthly breakdown">
+      <section
+        class="card table-card fi fi6"
+        id="tableSection"
+        aria-label="Monthly breakdown"
+      >
         <div class="table-header">
           <div class="section-title">Monthly breakdown</div>
         </div>
@@ -131,14 +162,31 @@
         </div>
         <div class="pagination" id="pagination"></div>
       </section>
-
-    </div><!-- /.page-wrap -->
+    </div>
+    <!-- /.page-wrap -->
 
     <!-- ── Footer ── -->
     <footer class="site-footer fi fi7">
       <div class="page-wrap footer-inner">
-        <span class="mono muted">Source: <a href="https://bsky.jazco.dev/stats" target="_blank" rel="noopener" class="footer-link">Jaz's bsky stats</a></span>
-        <span class="mono muted"><a href="https://github.com/Krekeny/bluesky-stats" target="_blank" rel="noopener" class="footer-link">GitHub Repository</a></span>
+        <span class="mono muted"
+          >Source:
+          <a
+            href="https://bsky.jazco.dev/stats"
+            target="_blank"
+            rel="noopener"
+            class="footer-link"
+            >Jaz's bsky stats</a
+          ></span
+        >
+        <span class="mono muted"
+          ><a
+            href="https://github.com/Krekeny/bluesky-stats"
+            target="_blank"
+            rel="noopener"
+            class="footer-link"
+            >GitHub Repository</a
+          ></span
+        >
         <span class="mono muted" id="footerYear"></span>
       </div>
     </footer>
